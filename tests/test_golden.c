@@ -25,6 +25,8 @@
  * @traceability SRS-007-SHALL-019: Replay determinism
  * @traceability SRS-007-SHALL-039: Source code traceability
  * @traceability SRS-007-SHALL-040: Test traceability
+ * @traceability SRS-007-SHALL-041: SRS traceability
+ * @traceability SRS-007-SHALL-040: Test traceability
  * @traceability SRS-007-SHALL-042: Bounded memory allocation
  * @traceability SRS-007-SHALL-043: Buffer overflow prevention
  * @traceability SRS-007-SHALL-044: No floating-point in governance

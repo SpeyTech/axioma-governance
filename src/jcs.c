@@ -27,6 +27,7 @@
  * @traceability SRS-007-SHALL-022: Trace canonicality
  * @traceability SRS-007-SHALL-039: Source code traceability
  * @traceability SRS-007-SHALL-040: Test traceability
+ * @traceability SRS-007-SHALL-041: SRS traceability — every public function has SRS anchors
  * @traceability SRS-007-SHALL-045: Proof hash computation
  */
 
@@ -189,6 +190,102 @@ static void jcs_write_string(jcs_writer_t *w, const uint8_t *data, size_t len) {
  */
 static void jcs_write_cstring(jcs_writer_t *w, const char *s) {
     jcs_write_string(w, (const uint8_t *)s, strlen(s));
+}
+
+/**
+ * @brief Validate that a byte sequence is well-formed UTF-8.
+ *
+ * F013 fix: The JCS encoder must reject invalid UTF-8 rather than pass
+ * through malformed bytes. Invalid UTF-8 in a canonical record would
+ * produce different byte representations across implementations.
+ *
+ * Returns 0 if valid, -1 if invalid.
+ *
+ * Validates:
+ * - Correct leading byte ranges (0x00-0x7F, 0xC2-0xDF, 0xE0-0xEF, 0xF0-0xF4)
+ * - Correct continuation bytes (0x80-0xBF)
+ * - No overlong encodings
+ * - No surrogates (U+D800-U+DFFF)
+ * - No codepoints above U+10FFFF
+ *
+ * @traceability SRS-007-SHALL-007: Canonical format — UTF-8 validation
+ */
+static int jcs_validate_utf8(const uint8_t *data, size_t len) {
+    size_t i = 0;
+    while (i < len) {
+        uint8_t b = data[i];
+        size_t  seq_len;
+        uint32_t codepoint;
+
+        if (b <= 0x7F) {
+            /* ASCII */
+            i++;
+            continue;
+        } else if (b >= 0xC2 && b <= 0xDF) {
+            seq_len = 2;
+            codepoint = (uint32_t)(b & 0x1F);
+        } else if (b >= 0xE0 && b <= 0xEF) {
+            seq_len = 3;
+            codepoint = (uint32_t)(b & 0x0F);
+        } else if (b >= 0xF0 && b <= 0xF4) {
+            seq_len = 4;
+            codepoint = (uint32_t)(b & 0x07);
+        } else {
+            /* Invalid leading byte (includes 0x80-0xBF bare, 0xC0, 0xC1, 0xF5+) */
+            return -1;
+        }
+
+        if (i + seq_len > len) {
+            return -1;  /* Truncated sequence */
+        }
+
+        /* Validate continuation bytes and accumulate codepoint */
+        {
+            size_t j;
+            for (j = 1; j < seq_len; j++) {
+                uint8_t cont = data[i + j];
+                if ((cont & 0xC0) != 0x80) {
+                    return -1;  /* Not a continuation byte */
+                }
+                codepoint = (codepoint << 6) | (cont & 0x3F);
+            }
+        }
+
+        /* Reject surrogates (U+D800-U+DFFF) */
+        if (codepoint >= 0xD800 && codepoint <= 0xDFFF) {
+            return -1;
+        }
+
+        /* Reject codepoints above U+10FFFF */
+        if (codepoint > 0x10FFFF) {
+            return -1;
+        }
+
+        /* Reject overlong encodings */
+        if (seq_len == 2 && codepoint < 0x80)   { return -1; }
+        if (seq_len == 3 && codepoint < 0x800)  { return -1; }
+        if (seq_len == 4 && codepoint < 0x10000){ return -1; }
+
+        i += seq_len;
+    }
+    return 0;
+}
+
+/**
+ * @brief Write a validated UTF-8 string as a JSON string.
+ *
+ * Rejects invalid UTF-8 before encoding. Sets overflow flag on failure
+ * so the caller's overflow check catches it.
+ *
+ * @traceability SRS-007-SHALL-007: Canonical format — reject invalid input
+ */
+static void jcs_write_cstring_validated(jcs_writer_t *w, const char *s) {
+    size_t len = strlen(s);
+    if (jcs_validate_utf8((const uint8_t *)s, len) != 0) {
+        w->overflow = true;  /* Treat as fatal encoding error */
+        return;
+    }
+    jcs_write_string(w, (const uint8_t *)s, len);
 }
 
 /*
@@ -373,7 +470,7 @@ int jcs_proof_to_canonical(
 
     /* claim */
     jcs_key(&w, "claim");
-    jcs_write_cstring(&w, record->claim);
+    jcs_write_cstring_validated(&w, record->claim);
     jcs_comma(&w);
 
     /* commitment */
@@ -407,13 +504,13 @@ int jcs_proof_to_canonical(
         /* Nested object with lexicographic key order: description, direction, key_field */
         jcs_object_start(&w);
         jcs_key(&w, "description");
-        jcs_write_cstring(&w, record->ordering_metadata.description);
+        jcs_write_cstring_validated(&w, record->ordering_metadata.description);
         jcs_comma(&w);
         jcs_key(&w, "direction");
-        jcs_write_cstring(&w, record->ordering_metadata.direction);
+        jcs_write_cstring_validated(&w, record->ordering_metadata.direction);
         jcs_comma(&w);
         jcs_key(&w, "key_field");
-        jcs_write_cstring(&w, record->ordering_metadata.key_field);
+        jcs_write_cstring_validated(&w, record->ordering_metadata.key_field);
         jcs_object_end(&w);
     } else {
         jcs_null(&w);
@@ -446,7 +543,7 @@ int jcs_proof_to_canonical(
 
     /* rule_id */
     jcs_key(&w, "rule_id");
-    jcs_write_cstring(&w, record->rule_id);
+    jcs_write_cstring_validated(&w, record->rule_id);
     jcs_comma(&w);
 
     /* schema_version */

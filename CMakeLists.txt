@@ -73,6 +73,10 @@ set(LIB_SOURCES
     src/proof.c
     src/trace.c
     src/merkle.c
+    src/verify.c
+    src/anchor.c
+    src/compliance.c
+    src/fault.c
 )
 
 set(LIB_HEADERS
@@ -81,6 +85,10 @@ set(LIB_HEADERS
     include/ax_proof.h
     include/ax_trace.h
     include/ax_merkle.h
+    include/ax_verify.h
+    include/ax_anchor.h
+    include/ax_compliance.h
+    include/ax_fault.h
     include/axilog/types.h
 )
 
@@ -132,6 +140,21 @@ if(BUILD_TESTS)
     target_link_libraries(test_merkle axioma-governance)
     add_test(NAME test_merkle COMMAND test_merkle)
 
+    # Test: Cross-Layer Verification
+    add_executable(test_verify tests/test_verify.c)
+    target_link_libraries(test_verify axioma-governance)
+    add_test(NAME test_verify COMMAND test_verify)
+
+    # Test: Anchor Publication and Compliance Reports
+    add_executable(test_anchor_compliance tests/test_anchor_compliance.c)
+    target_link_libraries(test_anchor_compliance axioma-governance)
+    add_test(NAME test_anchor_compliance COMMAND test_anchor_compliance)
+
+    # Test: Fault Handling and Fallback Log
+    add_executable(test_fault tests/test_fault.c)
+    target_link_libraries(test_fault axioma-governance)
+    add_test(NAME test_fault COMMAND test_fault)
+
     # Test: Golden Vectors (Determinism Certification)
     add_executable(test_golden tests/test_golden.c)
     target_link_libraries(test_golden axioma-governance)
@@ -175,3 +198,8 @@ message(STATUS "  Build Tests: ${BUILD_TESTS}")
 message(STATUS "  Build Docs: ${BUILD_DOCS}")
 message(STATUS "================================================================================")
 message(STATUS "")
+
+    # Test: Audit Finding Regressions (F009-F015)
+    add_executable(test_audit_findings tests/test_audit_findings.c)
+    target_link_libraries(test_audit_findings axioma-governance)
+    add_test(NAME test_audit_findings COMMAND test_audit_findings)

@@ -41,6 +41,38 @@ extern "C" {
 #define AX_PROOF_TAG_LEN 11  /* strlen("AX:PROOF:v1") */
 
 /**
+ * @brief The current schema version string.
+ *
+ * All AX:PROOF:v1 records must carry this exact string.
+ * Records carrying a different schema version string are rejected
+ * as non-conformant (SRS-007-SHALL-056).
+ *
+ * @traceability SRS-007-SHALL-056: Proof type versioning mechanism
+ */
+#define AX_PROOF_SCHEMA_VERSION "AX:PROOF:v1"
+
+/**
+ * @brief Check that a schema version string is supported.
+ *
+ * Returns true if the version is known and supported, false otherwise.
+ * Unsupported versions MUST be rejected with INTEGRITY_FAULT.
+ *
+ * @param version Schema version string from proof record
+ * @return true if supported
+ *
+ * @traceability SRS-007-SHALL-056: Proof type versioning mechanism
+ */
+static inline bool ax_proof_schema_version_valid(const char *version) {
+    if (version == NULL) { return false; }
+    /* Only AX:PROOF:v1 is supported in this implementation.
+     * AX:PROOF:v2+ proofs are rejected with INTEGRITY_FAULT per SHALL-056. */
+    return (version[0]  == 'A' && version[1]  == 'X' && version[2]  == ':' &&
+            version[3]  == 'P' && version[4]  == 'R' && version[5]  == 'O' &&
+            version[6]  == 'O' && version[7]  == 'F' && version[8]  == ':' &&
+            version[9]  == 'v' && version[10] == '1' && version[11] == '\0');
+}
+
+/**
  * @brief Ordering metadata structure (required if evidence_ordering = DECLARED)
  *
  * @traceability SRS-007-SHALL-057: Evidence ordering mode

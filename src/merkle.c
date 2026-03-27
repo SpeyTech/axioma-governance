@@ -126,14 +126,41 @@ int ax_merkle_add_leaves(
     size_t                count,
     ax_gov_fault_flags_t *faults
 ) {
+    /*
+     * Sort a local copy of the input hashes lexicographically before
+     * inserting. This ensures that ax_merkle_compute_root's sorted-input
+     * precondition (F011) is always satisfied when leaves are added via
+     * this batch path.
+     *
+     * The sort is on the local copy only — caller's array is unchanged.
+     */
+    uint8_t sorted[AX_MERKLE_MAX_LEAVES][32];
     size_t i;
 
     if (ctx == NULL || hashes == NULL || faults == NULL) {
         return -1;
     }
 
+    if (count == 0) {
+        return 0;
+    }
+
+    if (count > AX_MERKLE_MAX_LEAVES) {
+        faults->overflow = 1;
+        return -1;
+    }
+
+    /* Copy to local buffer */
     for (i = 0; i < count; i++) {
-        if (ax_merkle_add_leaf(ctx, hashes[i], faults) != 0) {
+        memcpy(sorted[i], hashes[i], 32);
+    }
+
+    /* Sort lexicographically (insertion sort — deterministic, bounded) */
+    ax_merkle_sort_hashes(sorted, count, faults);
+
+    /* Insert in sorted order */
+    for (i = 0; i < count; i++) {
+        if (ax_merkle_add_leaf(ctx, sorted[i], faults) != 0) {
             return -1;
         }
     }
@@ -179,6 +206,24 @@ int ax_merkle_compute_root(
         memcpy(ctx->root, ctx->leaves[0], 32);
         ctx->root_computed = true;
         return 0;
+    }
+
+    /*
+     * F011 fix: Validate that leaves are in lexicographically sorted order.
+     *
+     * The Merkle root is defined over a lexicographically sorted input list
+     * (SRS-007-SHALL-059). An unsorted input would produce a valid-looking
+     * but incorrect root — a silent integrity failure.
+     *
+     * ax_merkle_add_leaves sorts before inserting, but ax_merkle_add_leaf
+     * (single-leaf path) does not enforce ordering. This check catches any
+     * unsorted state regardless of how leaves were added.
+     */
+    for (i = 1; i < ctx->leaf_count; i++) {
+        if (memcmp(ctx->leaves[i - 1], ctx->leaves[i], 32) > 0) {
+            faults->ordering_fault = 1;
+            return -1;
+        }
     }
 
     /* Copy leaves to working buffer */
