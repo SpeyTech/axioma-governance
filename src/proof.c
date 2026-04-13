@@ -13,7 +13,7 @@
  *
  * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
  *            All rights reserved.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  * @patent UK GB2521625.0
  *
  * @traceability SRS-007-SHALL-003: Proof commitment
@@ -23,7 +23,8 @@
 
 #include "ax_proof.h"
 #include "ax_jcs.h"
-#include "axilog/types.h"
+#include <axilog/sha256.h>
+#include <axilog/commitment.h>
 #include <string.h>
 
 /*
@@ -401,12 +402,6 @@ static int ax_proof_finalise_crypto(
     size_t  len_no_hash;
     size_t  len_with_hash;
 
-    /* commitment = SHA-256(tag || LE64(len) || payload) */
-    /* Max size: 11 (tag) + 8 (LE64) + 16384 (payload) */
-    uint8_t commitment_input[11 + 8 + 16384];
-    size_t  commit_len;
-    uint64_t byte_len;
-
     /* Step 1: Serialise with proof_hash OMITTED */
     if (jcs_proof_to_canonical(record, canonical_no_hash,
                                sizeof(canonical_no_hash),
@@ -414,8 +409,8 @@ static int ax_proof_finalise_crypto(
         return -1;
     }
 
-    /* Step 2: proof_hash = SHA-256(canonical_no_hash) */
-    ax_sha256(canonical_no_hash, len_no_hash, record->proof_hash);
+    /* Step 2: proof_hash = SHA-256(canonical_no_hash) — plain digest, not evidence commitment */
+    axilog_sha256(record->proof_hash, canonical_no_hash, len_no_hash);
     record->proof_hash_computed = true;
 
     /* Step 3: Serialise with proof_hash INCLUDED — same function, same record */
@@ -425,27 +420,26 @@ static int ax_proof_finalise_crypto(
         return -1;
     }
 
-    /* Step 4: Build commitment input:
-     * "AX:PROOF:v1" (11 bytes) || LE64(byte_length) || canonical_with_hash
+    /* Step 4: Domain-separated commitment per DVEC-001 §4.3
+     * commit = SHA-256("AX:PROOF:v1" || LE64(len) || canonical_with_hash)
+     * axilog_commit() replaces the 16,403-byte commitment_input stack buffer.
+     * No large stack allocation — axilog_commit() handles input internally.
      */
-    memcpy(commitment_input, AX_PROOF_TAG, AX_PROOF_TAG_LEN);
-    commit_len = AX_PROOF_TAG_LEN;
-
-    byte_len = (uint64_t)len_with_hash;
-    commitment_input[commit_len++] = (uint8_t)(byte_len);
-    commitment_input[commit_len++] = (uint8_t)(byte_len >>  8);
-    commitment_input[commit_len++] = (uint8_t)(byte_len >> 16);
-    commitment_input[commit_len++] = (uint8_t)(byte_len >> 24);
-    commitment_input[commit_len++] = (uint8_t)(byte_len >> 32);
-    commitment_input[commit_len++] = (uint8_t)(byte_len >> 40);
-    commitment_input[commit_len++] = (uint8_t)(byte_len >> 48);
-    commitment_input[commit_len++] = (uint8_t)(byte_len >> 56);
-
-    memcpy(commitment_input + commit_len, canonical_with_hash, len_with_hash);
-    commit_len += len_with_hash;
-
-    /* Step 5: commitment = SHA-256(commitment_input) */
-    ax_sha256(commitment_input, commit_len, record->commitment);
+    {
+        ct_fault_flags_t commit_faults;
+        memset(&commit_faults, 0, sizeof(commit_faults));
+        axilog_commit(
+            AX_PROOF_TAG,
+            canonical_with_hash,
+            (uint64_t)len_with_hash,
+            record->commitment,
+            &commit_faults
+        );
+        if (commit_faults.domain != 0) {
+            faults->integrity_fault = 1;
+            return -1;
+        }
+    }
 
     return 0;
 }
@@ -610,7 +604,7 @@ int ax_proof_verify_hash(
         return -1;
     }
 
-    ax_sha256(buffer, json_len, computed_hash);
+    axilog_sha256(computed_hash, buffer, json_len);
 
     /* Compare */
     if (memcmp(computed_hash, record->proof_hash, 32) != 0) {

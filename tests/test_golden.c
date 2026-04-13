@@ -45,7 +45,7 @@
 #include "ax_trace.h"
 #include "ax_merkle.h"
 #include "ax_jcs.h"
-#include "axilog/types.h"
+#include <axilog/sha256.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -87,25 +87,25 @@ static void test_sha256_nist_vectors(void) {
 
     /* Vector 1: Empty string */
     TEST("SHA-256 NIST empty");
-    ax_sha256((const uint8_t*)"", 0, digest);
+    axilog_sha256(digest, (const uint8_t*)"", 0);
     hex_to_bytes("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", expected, 32);
     if (memcmp(digest, expected, 32) != 0) { bytes_to_hex(digest, 32, hex); FAIL(hex); } else PASS();
 
     /* Vector 2: "abc" */
     TEST("SHA-256 NIST 'abc'");
-    ax_sha256((const uint8_t*)"abc", 3, digest);
+    axilog_sha256(digest, (const uint8_t*)"abc", 3);
     hex_to_bytes("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", expected, 32);
     if (memcmp(digest, expected, 32) != 0) { FAIL("hash mismatch"); } else PASS();
 
     /* Vector 3: 448-bit message (two blocks) */
     TEST("SHA-256 NIST 448-bit");
-    ax_sha256((const uint8_t*)"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 56, digest);
+    axilog_sha256(digest, (const uint8_t*)"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 56);
     hex_to_bytes("248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1", expected, 32);
     if (memcmp(digest, expected, 32) != 0) { FAIL("hash mismatch"); } else PASS();
 
     /* Vector 4: 896-bit message */
     TEST("SHA-256 NIST 896-bit");
-    ax_sha256((const uint8_t*)"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu", 112, digest);
+    axilog_sha256(digest, (const uint8_t*)"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu", 112);
     hex_to_bytes("cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1", expected, 32);
     if (memcmp(digest, expected, 32) != 0) { FAIL("hash mismatch"); } else PASS();
 }

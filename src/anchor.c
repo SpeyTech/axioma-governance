@@ -15,7 +15,7 @@
  *
  * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
  *            All rights reserved.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  * @patent UK GB2521625.0
  *
  * @traceability SRS-007-SHALL-029: Anchor requirement
@@ -29,7 +29,7 @@
 
 #include "ax_anchor.h"
 #include "ax_verify.h"
-#include "axilog/types.h"
+#include <axilog/sha256.h>
 #include <string.h>
 
 /*
@@ -130,7 +130,7 @@ void ax_anchor_compute_hash(
     /* chain_head */
     memcpy(payload + offset, chain_head, 32);
 
-    ax_sha256(payload, sizeof(payload), anchor_hash_out);
+    axilog_sha256(anchor_hash_out, payload, sizeof(payload));
 }
 
 /**

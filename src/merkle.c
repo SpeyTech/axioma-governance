@@ -20,7 +20,7 @@
  *
  * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
  *            All rights reserved.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  * @patent UK GB2521625.0
  *
  * @traceability SRS-007-SHALL-051: Evidence closure proof
@@ -28,7 +28,7 @@
  */
 
 #include "ax_merkle.h"
-#include "axilog/types.h"
+#include <axilog/sha256.h>
 #include <string.h>
 
 /*
@@ -63,7 +63,7 @@ static void hash_pair(const uint8_t left[32], const uint8_t right[32], uint8_t o
     uint8_t combined[64];
     memcpy(combined, left, 32);
     memcpy(combined + 32, right, 32);
-    ax_sha256(combined, 64, out);
+    axilog_sha256(out, combined, 64);
 }
 
 /*
