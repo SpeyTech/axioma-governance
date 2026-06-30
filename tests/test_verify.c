@@ -3,7 +3,7 @@
  * @brief Cross-Layer Verification Protocol Tests
  *
  * @copyright Copyright (C) 2026 Spey Systems LTD.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  *
  * @traceability SRS-007-SHALL-011: Verification chain
  * @traceability SRS-007-SHALL-012: L1 substrate certification

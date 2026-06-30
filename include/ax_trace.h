@@ -14,7 +14,7 @@
  *
  * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  * @patent UK GB2521625.0
  *
  * @traceability SRS-007-SHALL-020: Mathematical trace requirement

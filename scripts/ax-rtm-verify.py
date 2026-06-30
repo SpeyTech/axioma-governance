@@ -19,7 +19,7 @@ Exit codes:
     2 — Script error (missing directory etc.)
 
 @copyright Copyright (C) 2026 Spey Systems LTD.
-@license GPL-3.0-or-later
+@license AGPL-3.0-or-later
 @patent UK GB2521625.0
 
 @traceability SRS-007-SHALL-039: Source code traceability

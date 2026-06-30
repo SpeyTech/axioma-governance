@@ -3,7 +3,7 @@
  * @brief Mathematical Trace Tests
  *
  * @copyright Copyright (C) 2026 Spey Systems LTD.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  *
  * @traceability SRS-007-SHALL-020: Mathematical trace structure
  * @traceability SRS-007-SHALL-021: Trace required fields

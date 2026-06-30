@@ -3,7 +3,7 @@
  * @brief Evidence Closure Merkle Tree Tests
  *
  * @copyright Copyright (C) 2026 Spey Systems LTD.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  *
  * @traceability SRS-007-SHALL-001: Cross-platform bit-identical execution
  * @traceability SRS-007-SHALL-040: Test traceability

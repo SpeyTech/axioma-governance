@@ -3,7 +3,7 @@
  * @brief AX:PROOF:v1 Record Tests
  *
  * @copyright Copyright (C) 2026 Spey Systems LTD.
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  *
  * @traceability SRS-007-SHALL-003: Proof commitment
  * @traceability SRS-007-SHALL-004: AX:PROOF:v1 required fields

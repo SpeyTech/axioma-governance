@@ -2,7 +2,7 @@
 
 **L7 Proof-Carrying Governance Layer for the Axioma Framework**
 
-[![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
 [![DVEC: v1.3](https://img.shields.io/badge/DVEC-v1.3-green.svg)](docs/DVEC-001-v1.3-Final.md)
 [![SRS: SRS-007 v0.3](https://img.shields.io/badge/SRS-007%20v0.3-orange.svg)](docs/requirements/SRS-007-v0.3.md)
 
@@ -125,7 +125,7 @@ This implementation traces to **SRS-007 v0.3 Audit-Frozen FINAL** with 61 SHALL 
 
 ## License
 
-GPL-3.0-or-later
+AGPL-3.0-or-later
 
 ## Patent
 
@@ -137,4 +137,4 @@ Copyright (C) 2026 Spey Systems LTD. All rights reserved.
 
 ## Author
 
-William Murray <william@speytech.com>
+William Murray <william@speysystems.com>
