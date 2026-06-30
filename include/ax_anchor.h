@@ -19,7 +19,7 @@
  * Anchor time is bound to a Time Oracle AX:OBS:v1 record
  * (SRS-007-SHALL-052), not a raw timestamp.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license GPL-3.0-or-later
  * @patent UK GB2521625.0

@@ -5,7 +5,7 @@
 # DETERMINISM: D2 — Constrained Deterministic
 # MEMORY: Bounded Allocation Model
 #
-# Copyright (c) 2026 The Murray Family Innovation Trust
+# Copyright (c) 2026 Spey Systems LTD
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Patent: UK GB2521625.0
 

@@ -11,7 +11,7 @@
  * Provides strict RFC 8785 canonical JSON encoding for governance records.
  * All operations are byte-exact with no reliance on C string semantics.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license GPL-3.0-or-later
  * @patent UK GB2521625.0

@@ -11,7 +11,7 @@
  * Implements the Evidence Closure Merkle tree for proving completeness
  * of evidence sets in compliance reports.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license GPL-3.0-or-later
  * @patent UK GB2521625.0

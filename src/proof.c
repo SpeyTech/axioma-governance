@@ -11,7 +11,7 @@
  * Implements AX:PROOF:v1 record construction and cryptographic binding.
  * Uses strict RFC 8785 JCS encoding via ax_jcs.h.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license AGPL-3.0-or-later
  * @patent UK GB2521625.0

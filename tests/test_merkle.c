@@ -2,7 +2,7 @@
  * @file test_merkle.c
  * @brief Evidence Closure Merkle Tree Tests
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  * @license GPL-3.0-or-later
  *
  * @traceability SRS-007-SHALL-001: Cross-platform bit-identical execution

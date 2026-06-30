@@ -11,7 +11,7 @@
  * AX:PROOF:v1 is the canonical evidence record representing a governance
  * proof. Every governance claim is committed as an AX:PROOF:v1 record.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license GPL-3.0-or-later
  * @patent UK GB2521625.0

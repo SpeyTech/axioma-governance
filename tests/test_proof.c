@@ -2,7 +2,7 @@
  * @file test_proof.c
  * @brief AX:PROOF:v1 Record Tests
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  * @license GPL-3.0-or-later
  *
  * @traceability SRS-007-SHALL-003: Proof commitment

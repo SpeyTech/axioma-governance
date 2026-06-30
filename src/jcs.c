@@ -18,7 +18,7 @@
  * This module operates on byte buffers (uint8_t*), never C strings,
  * to guarantee byte-exact encoding.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license GPL-3.0-or-later
  * @patent UK GB2521625.0

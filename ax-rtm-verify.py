@@ -18,7 +18,7 @@ Exit codes:
     1 — Missing traceability or coverage
     2 — Script error
 
-@copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+@copyright Copyright (C) 2026 Spey Systems LTD.
 @license GPL-3.0-or-later
 @patent UK GB2521625.0
 """

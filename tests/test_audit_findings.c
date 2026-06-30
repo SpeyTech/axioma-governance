@@ -6,7 +6,7 @@
  * audit. These tests exist to prove the findings are resolved and to
  * prevent regression.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  * @license GPL-3.0-or-later
  *
  * @traceability SRS-007-SHALL-007: Canonical format

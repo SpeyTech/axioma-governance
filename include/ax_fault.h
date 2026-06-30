@@ -19,7 +19,7 @@
  * Fallback log format is identical to AX:PROOF:v1 so it is
  * replayable and independently verifiable.
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license GPL-3.0-or-later
  * @patent UK GB2521625.0

@@ -133,7 +133,7 @@ UK Patent GB2521625.0 — Murray Deterministic Computing Platform (MDCP)
 
 ## Copyright
 
-Copyright (C) 2026 The Murray Family Innovation Trust. All rights reserved.
+Copyright (C) 2026 Spey Systems LTD. All rights reserved.
 
 ## Author
 

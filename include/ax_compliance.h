@@ -23,7 +23,7 @@
  *  - The public GPG key for anchor verification
  *  - Access to the public ledger or evidence set
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license GPL-3.0-or-later
  * @patent UK GB2521625.0

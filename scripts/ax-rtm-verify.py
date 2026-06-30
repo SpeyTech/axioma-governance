@@ -18,7 +18,7 @@ Exit codes:
     1 — One or more requirements missing traceability or test coverage
     2 — Script error (missing directory etc.)
 
-@copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+@copyright Copyright (C) 2026 Spey Systems LTD.
 @license GPL-3.0-or-later
 @patent UK GB2521625.0
 
@@ -384,7 +384,7 @@ def write_rtm_md(report: RTMReport, root: Path) -> Path:
         "",
         "---",
         "",
-        "*Copyright (C) 2026 The Murray Family Innovation Trust.*  ",
+        "*Copyright (C) 2026 Spey Systems LTD.*  ",
         "*Patent UK GB2521625.0*",
     ]
 

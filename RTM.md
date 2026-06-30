@@ -122,5 +122,5 @@ python3 scripts/ax-rtm-verify.py --md
 
 ---
 
-*Copyright (C) 2026 The Murray Family Innovation Trust.*  
+*Copyright (C) 2026 Spey Systems LTD.*  
 *Patent UK GB2521625.0*

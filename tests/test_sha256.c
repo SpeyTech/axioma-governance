@@ -2,7 +2,7 @@
  * @file test_sha256.c
  * @brief SHA-256 Implementation Tests
  *
- * @copyright Copyright (C) 2026 The Murray Family Innovation Trust.
+ * @copyright Copyright (C) 2026 Spey Systems LTD.
  * @license GPL-3.0-or-later
  *
  * @traceability SRS-005-SHALL-070: SHA-256 implementation
