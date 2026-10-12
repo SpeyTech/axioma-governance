@@ -153,6 +153,10 @@ if(BUILD_TESTS)
     target_link_libraries(test_merkle axioma-governance)
     add_test(NAME test_merkle COMMAND test_merkle)
 
+    add_executable(test_merkle_bounds tests/test_merkle_bounds.c)
+    target_link_libraries(test_merkle_bounds axioma-governance)
+    add_test(NAME test_merkle_bounds COMMAND test_merkle_bounds)
+
     # Test: Cross-Layer Verification
     add_executable(test_verify tests/test_verify.c)
     target_link_libraries(test_verify axioma-governance)
