@@ -666,15 +666,78 @@ int ax_proof_verify_hash(
 /**
  * @traceability SRS-007-AMD-004 (legacy v1 verification profile)
  *
- * Not yet implemented: the regression test is committed first, and fails.
+ * Reproduces the AX:PROOF:v1 producer exactly (ax_proof_finalise_crypto):
+ * both hashes were computed while the commitment field held 32 zero bytes,
+ * so the profile serialises a copy of the stored record with the commitment
+ * zeroed. Verification is not given the producer reference limit
+ * (SRS-007-AMD-002 SHALL-002); only the encoder buffer bounds it.
+ *
+ * The verdict states consistency of stored hashes with stored content. It
+ * is not provenance: anyone can produce a CONSISTENT record.
  */
 int ax_proof_verify_v1_legacy(
     const ax_proof_record_t      *record,
     ax_proof_v1_legacy_verdict_t *verdict,
     ax_gov_fault_flags_t         *faults
 ) {
-    (void)record;
-    (void)verdict;
-    (void)faults;
-    return -1;
+    ax_proof_record_t temp;          /* same stack profile as ax_proof_verify_hash */
+    ax_gov_fault_flags_t struct_faults;
+    ax_gov_fault_flags_t enc_faults;
+    uint8_t buffer[AX_PROOF_CANONICAL_MAX];
+    uint8_t digest[32];
+    size_t  len;
+
+    if (record == NULL || verdict == NULL || faults == NULL) {
+        return -1;
+    }
+
+    /* Structure: required fields, and a stored proof_hash to check. */
+    ax_gov_clear_faults(&struct_faults);
+    if (ax_proof_validate(record, &struct_faults) != 0 || !record->proof_hash_computed) {
+        *verdict = AX_PROOF_V1_LEGACY_STRUCTURE_INVALID;
+        return 0;
+    }
+
+    memcpy(&temp, record, sizeof(ax_proof_record_t));
+    memset(temp.commitment, 0, sizeof(temp.commitment));
+
+    /* proof_hash = SHA-256(canonical, commitment zeroed, proof_hash omitted) */
+    temp.proof_hash_computed = false;
+    ax_gov_clear_faults(&enc_faults);
+    if (jcs_proof_to_canonical(&temp, buffer, sizeof(buffer), &len, false, &enc_faults) != 0) {
+        faults->overflow |= enc_faults.overflow;
+        faults->integrity_fault |= enc_faults.integrity_fault;
+        *verdict = AX_PROOF_V1_LEGACY_STRUCTURE_INVALID;
+        return 0;
+    }
+    axilog_sha256(digest, buffer, len);
+    if (memcmp(digest, record->proof_hash, 32) != 0) {
+        *verdict = AX_PROOF_V1_LEGACY_HASH_MISMATCH;
+        return 0;
+    }
+
+    /* commitment = commit("AX:PROOF:v1", canonical, commitment zeroed,
+     *                     proof_hash included) */
+    temp.proof_hash_computed = true;
+    ax_gov_clear_faults(&enc_faults);
+    if (jcs_proof_to_canonical(&temp, buffer, sizeof(buffer), &len, true, &enc_faults) != 0) {
+        faults->overflow |= enc_faults.overflow;
+        faults->integrity_fault |= enc_faults.integrity_fault;
+        *verdict = AX_PROOF_V1_LEGACY_STRUCTURE_INVALID;
+        return 0;
+    }
+    {
+        ct_fault_flags_t commit_faults;
+        memset(&commit_faults, 0, sizeof(commit_faults));
+        axilog_commit(AX_PROOF_TAG, buffer, (uint64_t)len, digest, &commit_faults);
+        if (commit_faults.domain != 0) {
+            faults->integrity_fault = 1;
+            *verdict = AX_PROOF_V1_LEGACY_STRUCTURE_INVALID;
+            return 0;
+        }
+    }
+    *verdict = (memcmp(digest, record->commitment, 32) == 0)
+             ? AX_PROOF_V1_LEGACY_CONSISTENT
+             : AX_PROOF_V1_LEGACY_COMMITMENT_MISMATCH;
+    return 0;
 }
