@@ -1,5 +1,7 @@
 # Stage 1 CI (proposed; owner-approved approach 2026-10-12). Isolated branch only.
 # Third-party actions are pinned by full commit SHA. No secrets are used.
+# Every checkout sets persist-credentials: false; no job needs git credentials
+# after checkout (no push, no authenticated fetch).
 # Sibling repositories are checked out at pinned SHAs: no undocumented
 # estate state. Known defects on pinned main are asserted explicitly, never
 # hidden behind continue-on-error.
@@ -30,9 +32,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           path: estate/axioma-governance
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           repository: SpeyTech/axioma-spec
           ref: ${{ env.SPEC_SHA }}
           path: estate/axioma-spec
@@ -85,13 +89,16 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           path: estate/axioma-governance
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           path: estate/gov-main
           ref: ${{ env.MAIN_SHA }}
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
+          persist-credentials: false
           repository: SpeyTech/axioma-spec
           ref: ${{ env.SPEC_MAIN_SHA }}
           path: estate/axioma-spec
