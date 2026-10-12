@@ -71,7 +71,7 @@
 | `SRS-007-SHALL-040` | Claim-to-evidence mapping | jcs.c | test_golden.c<br>test_sha256.c<br>*(+3 more)* | ✅ PASS |
 | `SRS-007-SHALL-041` | SRS traceability — every public function has SRS anchors | jcs.c | test_golden.c | ✅ PASS |
 | `SRS-007-SHALL-042` | Bounded execution — O(N) or better per operation | ax_governance.h | test_golden.c<br>test_merkle.c | ✅ PASS |
-| `SRS-007-SHALL-043` | Bounded allocation model — Option B caller-provided buffers | ax_merkle.h<br>ax_fault.h<br>*(+2 more)* | test_golden.c<br>test_trace.c<br>*(+2 more)* | ✅ PASS |
+| `SRS-007-SHALL-043` | Bounded allocation model — Option B caller-provided buffers; AX:PROOF:v1 producer capacity 192 (SRS-007-AMD-002; test_proof_capacity.c) | ax_merkle.h<br>ax_fault.h<br>*(+2 more)* | test_golden.c<br>test_trace.c<br>*(+2 more)* | ✅ PASS |
 | `SRS-007-SHALL-044` | Configuration canonicality — policy set and config JCS-hashed at init | verify.c<br>ax_governance.h | test_golden.c | ✅ PASS |
 | `SRS-007-SHALL-045` | Cryptographic binding fields — proof_hash field OMITTED during hash computation | jcs.c<br>proof.c<br>*(+2 more)* | test_golden.c<br>test_audit_findings.c<br>*(+1 more)* | ✅ PASS |
 | `SRS-007-SHALL-046` | Evidence reference encoding — SHA-256 lowercase hex | jcs.c<br>proof.c<br>*(+1 more)* | test_golden.c | ✅ PASS |

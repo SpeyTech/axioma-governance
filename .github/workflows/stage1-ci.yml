@@ -69,6 +69,16 @@ jobs:
           want=$(cut -d' ' -f1 ci/fingerprints.txt)
           echo "FINGERPRINT axioma-governance ${{ matrix.name }} $(uname -m) $got"
           test "$got" = "$want"
+      - name: AX:PROOF:v1 valid-record fingerprint (PCR-007; must equal pristine main)
+        run: |
+          cd estate/axioma-governance
+          SAN="${{ matrix.san }}"
+          ${{ matrix.cc }} -std=c99 -O2 $SAN -Iinclude -I"$GITHUB_WORKSPACE/sdk-root/include" \
+              ci/fingerprint_proof.c src/*.c "$GITHUB_WORKSPACE/sdk-root/lib/libaxilog.a" -o "$RUNNER_TEMP/fingerprint_proof"
+          got=$("$RUNNER_TEMP/fingerprint_proof" | sha256sum | cut -d' ' -f1)
+          want=$(cut -d' ' -f1 ci/fingerprints-proof.txt)
+          echo "FINGERPRINT axioma-governance-proof ${{ matrix.name }} $(uname -m) $got"
+          test "$got" = "$want"
   known-defect-pinned-main:
     # D-03 must still reproduce on the pinned main commit until Part A merges.
     runs-on: ubuntu-24.04
@@ -96,3 +106,19 @@ jobs:
               build-spec/libaxilog.a -o d03_main
           if ./d03_main; then echo "D-03 no longer reproduces on $MAIN_SHA: update this job"; exit 1; fi
           echo "D-03 reproduces on $MAIN_SHA (expected until PCR-002 Part A merges)"
+      - name: Assert D-11 reproduces on pinned main (PCR-007 test must FAIL there)
+        run: |
+          gcc -std=c99 -g -fsanitize=address,undefined -fno-sanitize-recover=all -DAX_PROOF_MAX_EVIDENCE_REFS=192 \
+              -Iestate/gov-main/include -Iestate/axioma-spec/include \
+              estate/axioma-governance/tests/test_proof_capacity.c estate/gov-main/src/*.c \
+              build-spec/libaxilog.a -o d11_main
+          if ./d11_main; then echo "D-11 no longer reproduces on $MAIN_SHA: update this job"; exit 1; fi
+          echo "D-11 reproduces on $MAIN_SHA (expected until PCR-007 merges)"
+      - name: Valid AX:PROOF:v1 records on pinned main equal the committed fingerprint
+        run: |
+          gcc -std=c99 -O2 -Iestate/gov-main/include -Iestate/axioma-spec/include \
+              estate/axioma-governance/ci/fingerprint_proof.c estate/gov-main/src/*.c build-spec/libaxilog.a -o fpp_main
+          got=$(./fpp_main | sha256sum | cut -d' ' -f1)
+          want=$(cut -d' ' -f1 estate/axioma-governance/ci/fingerprints-proof.txt)
+          echo "FINGERPRINT axioma-governance-proof pinned-main $(uname -m) $got"
+          test "$got" = "$want"

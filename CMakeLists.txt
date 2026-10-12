@@ -157,6 +157,11 @@ if(BUILD_TESTS)
     target_link_libraries(test_merkle_bounds axioma-governance)
     add_test(NAME test_merkle_bounds COMMAND test_merkle_bounds)
 
+    # PCR-007 (D-11): producer capacity 192, P1, P2, legacy-record verification
+    add_executable(test_proof_capacity tests/test_proof_capacity.c)
+    target_link_libraries(test_proof_capacity axioma-governance)
+    add_test(NAME test_proof_capacity COMMAND test_proof_capacity)
+
     # Test: Cross-Layer Verification
     add_executable(test_verify tests/test_verify.c)
     target_link_libraries(test_verify axioma-governance)

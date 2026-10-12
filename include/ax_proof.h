@@ -41,6 +41,37 @@ extern "C" {
 #define AX_PROOF_TAG_LEN 11  /* strlen("AX:PROOF:v1") */
 
 /**
+ * @brief AX:PROOF:v1 producer capacity (PCR-007, finding D-11)
+ *
+ * The canonical AX:PROOF:v1 record is serialised into a buffer of
+ * AX_PROOF_CANONICAL_MAX bytes. Its size is exactly
+ *   F + AX_PROOF_CANONICAL_PER_REF * k - 1   (k >= 1 evidence references)
+ * where F is at most AX_PROOF_CANONICAL_FIXED_WORST: every string field at
+ * its maximum length and made of 6-byte \u00XX escapes, the longest enum
+ * strings, ledger_seq = 2^64 - 1, ordering metadata present and proof_hash
+ * included. The largest k that always fits is AX_PROOF_MAX_EVIDENCE_REFS.
+ *
+ * AX_MAX_EVIDENCE_REFS (1024) still sizes the record array and the Merkle
+ * and compliance structures; verification of existing records is bounded by
+ * the buffer only, so valid v1 records produced before this limit (up to
+ * 237 references with short strings) still verify.
+ *
+ * @traceability SRS-007-SHALL-043: Bounded allocation model (as amended)
+ */
+#define AX_PROOF_CANONICAL_MAX          16384
+#define AX_PROOF_CANONICAL_PER_REF      67     /* 64 hex + 2 quotes + 1 comma */
+#define AX_PROOF_CANONICAL_FIXED_WORST  3493
+#define AX_PROOF_MAX_EVIDENCE_REFS      192
+
+/* Compile-time proof that the bound is exact: 192 always fits, 193 may not. */
+typedef char ax_proof_capacity_fits[
+    (AX_PROOF_CANONICAL_FIXED_WORST + AX_PROOF_CANONICAL_PER_REF * AX_PROOF_MAX_EVIDENCE_REFS - 1
+     <= AX_PROOF_CANONICAL_MAX) ? 1 : -1];
+typedef char ax_proof_capacity_is_tight[
+    (AX_PROOF_CANONICAL_FIXED_WORST + AX_PROOF_CANONICAL_PER_REF * (AX_PROOF_MAX_EVIDENCE_REFS + 1) - 1
+     > AX_PROOF_CANONICAL_MAX) ? 1 : -1];
+
+/**
  * @brief The current schema version string.
  *
  * All AX:PROOF:v1 records must carry this exact string.
@@ -171,7 +202,9 @@ int ax_proof_init(
  * @param record Proof record
  * @param evidence_hash SHA-256 hash of evidence record (32 bytes)
  * @param faults Fault context
- * @return 0 on success, -1 if full
+ * @return 0 on success, -1 if full: a record accepts at most
+ *         AX_PROOF_MAX_EVIDENCE_REFS (192) references; the next one sets
+ *         faults->overflow and leaves the record unchanged.
  *
  * @traceability SRS-007-SHALL-006: Evidence reference requirement
  * @traceability SRS-007-SHALL-046: Evidence reference encoding
@@ -189,7 +222,9 @@ int ax_proof_add_evidence(
  * @param ordering Ordering mode
  * @param metadata Ordering metadata (required if DECLARED, NULL otherwise)
  * @param faults Fault context
- * @return 0 on success, -1 on error
+ * @return 0 on success, -1 on error. Each metadata string (description,
+ *         key_field, direction) must be NUL-terminated within its array;
+ *         otherwise faults->overflow is set and the record is unchanged.
  *
  * @traceability SRS-007-SHALL-057: Evidence ordering mode
  */
@@ -207,6 +242,11 @@ int ax_proof_set_ordering(
  * @param result Proof result
  * @param violation Violation type (if result is INVALID)
  * @param faults Fault context
+ *
+ * An out-of-range result or violation sets faults->integrity_fault and is
+ * latched in the record: both values are stored unmasked, so every later
+ * ax_proof_finalise / ax_proof_compute_hash on the record fails with
+ * integrity_fault. The signature is unchanged.
  *
  * @traceability SRS-007-SHALL-004: AX:PROOF:v1 required fields
  */
