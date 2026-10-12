@@ -162,6 +162,11 @@ if(BUILD_TESTS)
     target_link_libraries(test_proof_capacity axioma-governance)
     add_test(NAME test_proof_capacity COMMAND test_proof_capacity)
 
+    # D-23: AX:PROOF:v1 legacy verification profile (SRS-007-AMD-004)
+    add_executable(test_proof_v1_legacy tests/test_proof_v1_legacy.c)
+    target_link_libraries(test_proof_v1_legacy axioma-governance)
+    add_test(NAME test_proof_v1_legacy COMMAND test_proof_v1_legacy)
+
     # Test: Cross-Layer Verification
     add_executable(test_verify tests/test_verify.c)
     target_link_libraries(test_verify axioma-governance)

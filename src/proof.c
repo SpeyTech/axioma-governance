@@ -662,3 +662,19 @@ int ax_proof_verify_hash(
 
     return 0;
 }
+
+/**
+ * @traceability SRS-007-AMD-004 (legacy v1 verification profile)
+ *
+ * Not yet implemented: the regression test is committed first, and fails.
+ */
+int ax_proof_verify_v1_legacy(
+    const ax_proof_record_t      *record,
+    ax_proof_v1_legacy_verdict_t *verdict,
+    ax_gov_fault_flags_t         *faults
+) {
+    (void)record;
+    (void)verdict;
+    (void)faults;
+    return -1;
+}
