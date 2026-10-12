@@ -10,7 +10,10 @@ on:
 permissions:
   contents: read
 env:
-  SPEC_SHA: cf728450e5eb12ffa7d3cc6d405cf53c92e00fae
+  # Integration jobs test Stage 1 components together at their intended
+  # revisions. Baseline defect jobs use the *_MAIN_SHA pins only.
+  SPEC_SHA: 39e91e867a710cdecfcf3ebd391f6c566e6fbc4f
+  SPEC_MAIN_SHA: cf728450e5eb12ffa7d3cc6d405cf53c92e00fae
   MAIN_SHA: 93d75a6e3e9558f1ce7e7763da6defdc56fe1371
 jobs:
   build-test:
@@ -56,6 +59,16 @@ jobs:
                 -DAXILOG_SDK_ROOT="$PWD/sdk-root"
           cmake --build build -j
           ctest --test-dir build --output-on-failure
+      - name: Cross-architecture fingerprint (must equal ci/fingerprints.txt on every matrix entry)
+        run: |
+          cd estate/axioma-governance
+          SAN="${{ matrix.san }}"
+          ${{ matrix.cc }} -std=c99 -O2  $SAN -Iinclude -I"$GITHUB_WORKSPACE/sdk-root/include" \
+              ci/fingerprint.c src/*.c "$GITHUB_WORKSPACE/sdk-root/lib/libaxilog.a" -o "$RUNNER_TEMP/fingerprint"
+          got=$("$RUNNER_TEMP/fingerprint" | sha256sum | cut -d' ' -f1)
+          want=$(cut -d' ' -f1 ci/fingerprints.txt)
+          echo "FINGERPRINT axioma-governance ${{ matrix.name }} $(uname -m) $got"
+          test "$got" = "$want"
   known-defect-pinned-main:
     # D-03 must still reproduce on the pinned main commit until Part A merges.
     runs-on: ubuntu-24.04
@@ -70,7 +83,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           repository: SpeyTech/axioma-spec
-          ref: ${{ env.SPEC_SHA }}
+          ref: ${{ env.SPEC_MAIN_SHA }}
           path: estate/axioma-spec
       - name: Build substrate
         run: |
