@@ -2,15 +2,19 @@
 
 **L7 Proof-Carrying Governance Layer for the Axioma Framework**
 
-[![License: GPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
-[![DVEC: v1.3](https://img.shields.io/badge/DVEC-v1.3-green.svg)](docs/DVEC-001-v1.3-Final.md)
-[![SRS: SRS-007 v0.3](https://img.shields.io/badge/SRS-007%20v0.3-orange.svg)](docs/requirements/SRS-007-v0.3.md)
+[![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
+[![DVEC: v1.3](https://img.shields.io/badge/DVEC-v1.3-green.svg)](https://github.com/SpeyTech/axioma-spec/tree/main/docs)
+[![SRS: SRS-007 v0.3](https://img.shields.io/badge/SRS-007%20v0.3-orange.svg)](https://github.com/SpeyTech/axioma-spec/blob/main/docs/requirements/SRS-007-v0.3.md)
 
 ## Overview
 
 axioma-governance implements the proof-carrying governance layer for the Axioma verifiable AI execution framework. Every governance claim becomes a cryptographically evidenced argument over committed evidence records.
 
 **Governing Principle:** *"A regulator does not receive an assertion. They receive a cryptographic proof."*
+
+### Assurance boundary
+
+The records produced here are SHA-256 commitments over data the caller supplies. At this revision they establish integrity of the recorded bytes relative to a trusted root or head obtained by other means. They do not establish that the recorded events were true, complete or authorised, that a policy was substantively correct, or that any regulatory standard is met. Compliance reports check the presence and non-zero hashes of the evidence the caller provides; they are not regulatory assessments. Proof records are unkeyed (no signatures), and anchor verification recomputes the anchor's own fields only. Merkle membership proofs at this revision have no leaf/internal-node domain separation and do not bind the leaf index or path length, so they should not be relied on as evidence of set membership until that is fixed.
 
 ## Axioma Layer Stack
 
