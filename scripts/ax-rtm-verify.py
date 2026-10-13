@@ -20,7 +20,6 @@ Exit codes:
 
 @copyright Copyright (C) 2026 Spey Systems LTD.
 @license AGPL-3.0-or-later
-@patent UK GB2521625.0
 
 @traceability SRS-007-SHALL-039: Source code traceability
 @traceability SRS-007-SHALL-040: Test traceability
@@ -287,7 +286,6 @@ def write_rtm_md(report: RTMReport, root: Path) -> Path:
         "| SRS | SRS-007 v0.3 Audit-Frozen FINAL |",
         "| Repository | axioma-governance |",
         "| Layer | L7 — Governance |",
-        "| Patent | UK GB2521625.0 |",
         "",
         "---",
         "",
@@ -385,7 +383,6 @@ def write_rtm_md(report: RTMReport, root: Path) -> Path:
         "---",
         "",
         "*Copyright (C) 2026 Spey Systems LTD.*  ",
-        "*Patent UK GB2521625.0*",
     ]
 
     out_path = root / "RTM.md"

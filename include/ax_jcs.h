@@ -14,7 +14,6 @@
  * @copyright Copyright (C) 2026 Spey Systems LTD.
  *            All rights reserved.
  * @license AGPL-3.0-or-later
- * @patent UK GB2521625.0
  *
  * @traceability SRS-007-SHALL-007: Canonical format (RFC 8785)
  */

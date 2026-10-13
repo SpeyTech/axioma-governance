@@ -131,10 +131,6 @@ This implementation traces to **SRS-007 v0.3 Audit-Frozen FINAL** with 61 SHALL 
 
 AGPL-3.0-or-later
 
-## Patent
-
-UK Patent GB2521625.0 — Murray Deterministic Computing Platform (MDCP)
-
 ## Copyright
 
 Copyright (C) 2026 Spey Systems LTD. All rights reserved.

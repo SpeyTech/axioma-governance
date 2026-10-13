@@ -20,7 +20,6 @@ Exit codes:
 
 @copyright Copyright (C) 2026 Spey Systems LTD.
 @license AGPL-3.0-or-later
-@patent UK GB2521625.0
 """
 
 import os

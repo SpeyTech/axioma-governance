@@ -7,7 +7,6 @@
 | SRS | SRS-007 v0.3 Audit-Frozen FINAL |
 | Repository | axioma-governance |
 | Layer | L7 — Governance |
-| Patent | UK GB2521625.0 |
 
 ---
 
@@ -123,4 +122,3 @@ python3 scripts/ax-rtm-verify.py --md
 ---
 
 *Copyright (C) 2026 Spey Systems LTD.*  
-*Patent UK GB2521625.0*
