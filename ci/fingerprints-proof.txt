@@ -1,0 +1,1 @@
+a41cfd81d126eab74dfa4695cbbd0a388cb09a90bd5f4bfeb70b48ebe057afa9  ci/fingerprint_proof.c output (equals pristine main 93d75a6; x86_64 GCC 13 -O2, Clang 18 -O2, GCC ASan+UBSan agree)

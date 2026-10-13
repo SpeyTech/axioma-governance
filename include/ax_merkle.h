@@ -39,6 +39,14 @@ extern "C" {
 #define AX_MERKLE_MAX_LEAVES 1024
 
 /**
+ * @brief Capacity of a proof path (log2(1024) = 10, +10 for safety)
+ *
+ * Sizes ax_merkle_proof_t.siblings and .is_left; ax_merkle_verify_proof
+ * rejects any proof_depth above it.
+ */
+#define AX_MERKLE_MAX_DEPTH 20
+
+/**
  * @brief Merkle tree context
  *
  * Tree structure: Binary Merkle tree, left-balanced
@@ -62,8 +70,8 @@ typedef struct {
 typedef struct {
     uint8_t  leaf_hash[32];                      /**< The leaf being proven */
     size_t   leaf_index;                         /**< Index of leaf in tree */
-    uint8_t  siblings[20][32];                   /**< Sibling hashes (max depth 20 for 2^20 leaves) */
-    bool     is_left[20];                        /**< true if sibling is on left */
+    uint8_t  siblings[AX_MERKLE_MAX_DEPTH][32];  /**< Sibling hashes */
+    bool     is_left[AX_MERKLE_MAX_DEPTH];       /**< true if sibling is on left */
     size_t   proof_depth;                        /**< Number of siblings */
     uint8_t  root[32];                           /**< Expected root */
 } ax_merkle_proof_t;
@@ -196,7 +204,8 @@ int ax_merkle_generate_proof(
  *
  * @param proof Merkle proof to verify
  * @param faults Fault context
- * @return 0 if valid, -1 if invalid
+ * @return 0 if valid, -1 if invalid (proof_depth > AX_MERKLE_MAX_DEPTH
+ *         sets faults->overflow)
  *
  * @traceability SRS-007-SHALL-059: Merkle tree algorithm
  */
