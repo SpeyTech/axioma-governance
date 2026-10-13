@@ -382,6 +382,12 @@ int ax_proof_validate(
  *
  * Recomputes proof_hash and compares to stored value.
  *
+ * Finding D-23: proof_hash is computed by ax_proof_finalise while the
+ * commitment field still holds 32 zero bytes, and the finalised record then
+ * carries the real commitment. This function serialises the record as given,
+ * so it reports a mismatch for every finalised record. Its behaviour is kept
+ * unchanged; use ax_proof_verify_v1_legacy for stored AX:PROOF:v1 records.
+ *
  * @param record Proof record to verify
  * @param faults Fault context
  * @return 0 if valid, -1 if mismatch
@@ -391,6 +397,51 @@ int ax_proof_validate(
 int ax_proof_verify_hash(
     const ax_proof_record_t *record,
     ax_gov_fault_flags_t    *faults
+);
+
+/**
+ * @brief Verdicts of the AX:PROOF:v1 legacy verification profile (D-23)
+ *
+ * The profile checks STRUCTURE and HASH CONSISTENCY of a stored v1 record
+ * only. AX_PROOF_V1_LEGACY_CONSISTENT means the stored proof_hash and
+ * commitment are exactly what an AX:PROOF:v1 producer computes for this
+ * record content. It does NOT mean the record is authentic, was produced by
+ * any particular party, or that its claim is true: provenance requires a
+ * separately authenticated chain head or signature.
+ *
+ * @traceability SRS-007-AMD-004 (legacy v1 verification profile)
+ */
+typedef enum {
+    AX_PROOF_V1_LEGACY_CONSISTENT          = 0, /**< both hashes reproduce under the profile */
+    AX_PROOF_V1_LEGACY_HASH_MISMATCH       = 1, /**< proof_hash does not reproduce */
+    AX_PROOF_V1_LEGACY_COMMITMENT_MISMATCH = 2, /**< proof_hash reproduces, commitment does not */
+    AX_PROOF_V1_LEGACY_STRUCTURE_INVALID   = 3  /**< record fails structural checks; no hash computed */
+} ax_proof_v1_legacy_verdict_t;
+
+/**
+ * @brief Legacy verification profile for stored AX:PROOF:v1 records (D-23)
+ *
+ * Structural checks: ax_proof_validate passes, proof_hash_computed is set,
+ * and the record encodes within AX_PROOF_CANONICAL_MAX (no producer limit on
+ * the number of references is applied: records of 193 to 237 references
+ * produced before SRS-007-AMD-002 remain eligible).
+ *
+ * Hash profile, reproducing the v1 producer exactly:
+ *   proof_hash  = SHA-256(canonical(record, commitment = 32 zero bytes,
+ *                                   proof_hash omitted))
+ *   commitment  = commit("AX:PROOF:v1",
+ *                        canonical(record, commitment = 32 zero bytes,
+ *                                  proof_hash included))
+ *
+ * @param record  Stored record (not modified)
+ * @param verdict Out: verdict, set whenever the function returns 0
+ * @param faults  Fault context (overflow / integrity_fault on encoder refusal)
+ * @return 0 when a verdict was produced, -1 on NULL arguments
+ */
+int ax_proof_verify_v1_legacy(
+    const ax_proof_record_t      *record,
+    ax_proof_v1_legacy_verdict_t *verdict,
+    ax_gov_fault_flags_t         *faults
 );
 
 #ifdef __cplusplus
