@@ -463,6 +463,33 @@ int jcs_proof_to_canonical(
         return -1;
     }
 
+    /*
+     * PCR-007 (D-11) defence in depth: the record is a public struct and can
+     * be filled without the setters. Refuse to index a string table with an
+     * out-of-range enum, to read past the evidence array, or to run strlen
+     * past the end of a string field.
+     */
+    if ((unsigned)record->proof_type >= (unsigned)AX_PROOF_TYPE_COUNT ||
+        (unsigned)record->evidence_ordering > (unsigned)AX_EVIDENCE_ORDER_DECLARED ||
+        (unsigned)record->result > (unsigned)AX_PROOF_RESULT_INTEGRITY_FAULT ||
+        (unsigned)record->violation > (unsigned)AX_VIOLATION_FALLBACK_OVERFLOW) {
+        faults->integrity_fault = 1;
+        return -1;
+    }
+    if (record->evidence_refs_count > AX_MAX_EVIDENCE_REFS ||
+        memchr(record->claim, '\0', sizeof(record->claim)) == NULL ||
+        memchr(record->rule_id, '\0', sizeof(record->rule_id)) == NULL ||
+        (record->ordering_metadata.is_set &&
+         (memchr(record->ordering_metadata.description, '\0',
+                 sizeof(record->ordering_metadata.description)) == NULL ||
+          memchr(record->ordering_metadata.key_field, '\0',
+                 sizeof(record->ordering_metadata.key_field)) == NULL ||
+          memchr(record->ordering_metadata.direction, '\0',
+                 sizeof(record->ordering_metadata.direction)) == NULL))) {
+        faults->overflow = 1;
+        return -1;
+    }
+
     jcs_init(&w, buffer, buffer_size);
 
     /* Object start */

@@ -37,11 +37,6 @@
  * ============================================================================
  */
 
-/**
- * @brief Maximum tree depth (log2(1024) = 10, +10 for safety)
- */
-#define AX_MERKLE_MAX_DEPTH 20
-
 /*
  * ============================================================================
  * Helper Functions
@@ -400,6 +395,14 @@ int ax_merkle_verify_proof(
     size_t i;
 
     if (proof == NULL || faults == NULL) {
+        return -1;
+    }
+
+    /* proof_depth is caller-supplied: never index past the sibling arrays
+     * (finding D-03). Rejects only proofs that previously read out of
+     * bounds; no in-bounds proof changes verdict. */
+    if (proof->proof_depth > AX_MERKLE_MAX_DEPTH) {
+        faults->overflow = 1;
         return -1;
     }
 

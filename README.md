@@ -85,6 +85,8 @@ ax_proof_finalise(&proof, &faults);
 // proof.proof_hash and proof.commitment are now set
 ```
 
+**Capacity.** An `AX:PROOF:v1` record accepts at most `AX_PROOF_MAX_EVIDENCE_REFS` (192) evidence references; `ax_proof_add_evidence` rejects the next one with an overflow fault. 192 is derived, not chosen: the worst-case canonical record is `3,493 + 67·k − 1` bytes, and the serialisation buffer is 16,384 bytes (SRS-007-AMD-002, PCR-007). Ordering metadata strings must be NUL-terminated within their arrays, and out-of-range result or violation values are latched as an integrity fault that blocks finalisation. Existing valid records with more references still encode and verify as before. `AX_MAX_EVIDENCE_REFS` (1,024) remains the Merkle and compliance structure size.
+
 ## API Reference
 
 ### Core Types

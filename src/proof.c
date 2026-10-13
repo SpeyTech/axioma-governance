@@ -196,7 +196,9 @@ int ax_proof_add_evidence(
         return -1;
     }
 
-    if (record->evidence_refs_count >= AX_MAX_EVIDENCE_REFS) {
+    /* PCR-007 (D-11): producer capacity is AX_PROOF_MAX_EVIDENCE_REFS, the
+     * largest count whose worst-case canonical form always fits. */
+    if (record->evidence_refs_count >= AX_PROOF_MAX_EVIDENCE_REFS) {
         faults->overflow = 1;
         return -1;
     }
@@ -250,6 +252,14 @@ int ax_proof_set_ordering(
             faults->integrity_fault = 1;
             return -1;
         }
+        /* PCR-007 P1: each string must be terminated within its own array,
+         * or strlen would read on into the next field (D-11). */
+        if (memchr(metadata->description, '\0', sizeof(metadata->description)) == NULL ||
+            memchr(metadata->key_field, '\0', sizeof(metadata->key_field)) == NULL ||
+            memchr(metadata->direction, '\0', sizeof(metadata->direction)) == NULL) {
+            faults->overflow = 1;
+            return -1;
+        }
         memcpy(&record->ordering_metadata, metadata, sizeof(ax_ordering_metadata_t));
     } else {
         /* LEX: no metadata required */
@@ -272,6 +282,18 @@ void ax_proof_set_result(
     ax_gov_fault_flags_t *faults
 ) {
     if (record == NULL || faults == NULL) {
+        return;
+    }
+
+    /* PCR-007 P2: out-of-range values are latched, not silently dropped.
+     * Both are stored unmasked so that finalisation rejects the record
+     * (proof_enums_valid); the signature stays void. */
+    if ((unsigned)result > (unsigned)AX_PROOF_RESULT_INTEGRITY_FAULT ||
+        (unsigned)violation > (unsigned)AX_VIOLATION_FALLBACK_OVERFLOW) {
+        faults->integrity_fault = 1;
+        record->result = result;
+        record->violation = violation;
+        record->proof_hash_computed = false;
         return;
     }
 
@@ -385,6 +407,14 @@ int ax_proof_to_canonical_json(
  * @traceability SRS-007-SHALL-045: Cryptographic binding fields
  * @traceability SRS-007-SHALL-054: Commitment payload encoding
  */
+static int proof_enums_valid(const ax_proof_record_t *record)
+{
+    return (unsigned)record->proof_type < (unsigned)AX_PROOF_TYPE_COUNT &&
+           (unsigned)record->evidence_ordering <= (unsigned)AX_EVIDENCE_ORDER_DECLARED &&
+           (unsigned)record->result <= (unsigned)AX_PROOF_RESULT_INTEGRITY_FAULT &&
+           (unsigned)record->violation <= (unsigned)AX_VIOLATION_FALLBACK_OVERFLOW;
+}
+
 static int ax_proof_finalise_crypto(
     ax_proof_record_t    *record,
     ax_gov_fault_flags_t *faults
@@ -397,10 +427,22 @@ static int ax_proof_finalise_crypto(
      * These are the only two buffers used. They are produced by the same
      * encoder function. No other serialisation occurs.
      */
-    uint8_t canonical_no_hash[16384];
-    uint8_t canonical_with_hash[16384];
+    uint8_t canonical_no_hash[AX_PROOF_CANONICAL_MAX];
+    uint8_t canonical_with_hash[AX_PROOF_CANONICAL_MAX];
     size_t  len_no_hash;
     size_t  len_with_hash;
+
+    /* PCR-007: producer-side checks shared by every finalisation path
+     * (ax_proof_finalise, ax_proof_compute_hash, ax_proof_compute_commitment),
+     * so a record filled by direct struct writes is held to the same rules. */
+    if (!proof_enums_valid(record)) {
+        faults->integrity_fault = 1;
+        return -1;
+    }
+    if (record->evidence_refs_count > AX_PROOF_MAX_EVIDENCE_REFS) {
+        faults->overflow = 1;
+        return -1;
+    }
 
     /* Step 1: Serialise with proof_hash OMITTED */
     if (jcs_proof_to_canonical(record, canonical_no_hash,
@@ -487,6 +529,12 @@ int ax_proof_finalise(
     ax_gov_fault_flags_t *faults
 ) {
     if (record == NULL || faults == NULL) {
+        return -1;
+    }
+
+    /* PCR-007: bound the count before sorting reads the array. */
+    if (record->evidence_refs_count > AX_PROOF_MAX_EVIDENCE_REFS) {
+        faults->overflow = 1;
         return -1;
     }
 
@@ -583,7 +631,7 @@ int ax_proof_verify_hash(
 ) {
     ax_proof_record_t temp;
     uint8_t computed_hash[32];
-    uint8_t buffer[16384];
+    uint8_t buffer[AX_PROOF_CANONICAL_MAX];
     size_t json_len;
 
     if (record == NULL || faults == NULL) {

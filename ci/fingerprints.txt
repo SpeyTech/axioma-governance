@@ -1,0 +1,1 @@
+c5836fad225ffc572a66dee8ab9c5807fd144688ef1bfda0b78e18052c9833dc  ci/fingerprint.c output (x86_64 reference: GCC 13 -O2, Clang 18 -O2 and GCC ASan+UBSan agree)
